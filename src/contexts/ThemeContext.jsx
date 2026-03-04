@@ -4,7 +4,6 @@ const themes = {
   forest: {
     id: 'forest',
     name: 'Forest',
-    bgImage: 'https://images.unsplash.com/photo-1511497584788-876760111969?q=80&w=2070&auto=format&fit=crop', // Deep Forest
     video: '/videos/forest.mp4',
     colors: {
       bg: 'bg-[#2d3e30]',
@@ -16,7 +15,6 @@ const themes = {
   cafe: {
     id: 'cafe',
     name: 'Cafe',
-    bgImage: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=2047&auto=format&fit=crop', // Cozy Cafe
     video: '/videos/cafe.mp4',
     colors: {
       bg: 'bg-[#3e2d20]',
@@ -28,7 +26,6 @@ const themes = {
   bedroom: {
     id: 'bedroom',
     name: 'Bedroom',
-    bgImage: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=2069&auto=format&fit=crop', // Cozy Bedroom Night
     video: '/videos/bedroom.mp4',
     colors: {
       bg: 'bg-[#1a1a2e]',
@@ -50,8 +47,22 @@ export function ThemeProvider({ children }) {
     }
   };
 
+  const setCustomThemeVideo = (videoId) => {
+    setCurrentTheme({
+      id: 'custom',
+      name: 'Custom',
+      video: `youtube:${videoId}`,
+      colors: {
+        bg: 'bg-[#1a1a2e]', // Fallback to a dark tint
+        primary: 'text-[#16213e]',
+        accent: 'text-[#0f3460]',
+        panel: 'bg-[#000000]/80', // Darker panel for custom themes since we don't know the video color
+      }
+    });
+  };
+
   return (
-    <ThemeContext.Provider value={{ currentTheme, setTheme, themes }}>
+    <ThemeContext.Provider value={{ currentTheme, setTheme, setCustomThemeVideo, themes }}>
       {children}
     </ThemeContext.Provider>
   );

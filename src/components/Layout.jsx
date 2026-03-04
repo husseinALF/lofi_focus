@@ -1,5 +1,7 @@
 import React from 'react';
 import { useTheme } from '../contexts/ThemeContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import YouTube from 'react-youtube';
 import { cn } from '../lib/utils';
 
 const Layout = ({ children }) => {
@@ -7,17 +9,45 @@ const Layout = ({ children }) => {
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden transition-all duration-700 ease-in-out">
-      {/* Background Video */}
-      <video
-        key={currentTheme.id} // Force re-render on theme change
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
-        src={currentTheme.video}
-        poster={currentTheme.bgImage} // Fallback image
-      />
+      <AnimatePresence>
+        {currentTheme.video.startsWith('youtube:') ? (
+          <motion.div
+            key={currentTheme.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            className="absolute inset-0 w-full h-full pointer-events-none scale-[1.15] lg:scale-125 xl:scale-150"
+          >
+            <YouTube 
+              videoId={currentTheme.video.replace('youtube:', '')}
+              opts={{
+                width: '100%',
+                height: '100%',
+                playerVars: { autoplay: 1, controls: 0, disablekb: 1, fs: 0, loop: 1, modestbranding: 1, mute: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playlist: currentTheme.video.replace('youtube:', '') }
+              }}
+              className="w-full h-full"
+              iframeClassName="w-full h-full object-cover"
+              onReady={(e) => { e.target.playVideo(); e.target.mute(); }}
+            />
+          </motion.div>
+        ) : (
+          <motion.video
+            key={currentTheme.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.5, ease: "easeInOut" }}
+            autoPlay
+            muted
+            loop
+            playsInline
+            className="absolute inset-0 w-full h-full object-cover"
+            src={currentTheme.video}
+            poster={currentTheme.bgImage} // Fallback image
+          />
+        )}
+      </AnimatePresence>
       
       {/* Fallback/Tint Layer */}
       <div 

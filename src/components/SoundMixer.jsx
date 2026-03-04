@@ -130,10 +130,10 @@ const SoundMixer = ({ onMixChange, savedMix, isGlobalMute = false }) => {
 
   return (
     <div className={cn(
-      "p-6 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl w-full max-w-sm",
+      "flex flex-col p-6 rounded-2xl backdrop-blur-md border border-white/10 shadow-xl w-full",
       currentTheme.colors.panel
     )}>
-      <div className="flex items-center justify-between mb-6 text-white/90">
+      <div className="flex items-center justify-between mb-6 text-white/90 shrink-0">
         <div className="flex items-center gap-2">
           <Sliders size={20} />
           <h2 className="text-lg font-semibold tracking-wide">Ambience Mixer</h2>
@@ -150,7 +150,7 @@ const SoundMixer = ({ onMixChange, savedMix, isGlobalMute = false }) => {
         </button>
       </div>
       
-      <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+      <div className="space-y-1.5 overflow-y-auto pr-2 custom-scrollbar max-h-[calc(100vh-200px)] lg:max-h-[500px]">
         {SOUNDS.map(sound => (
           <SoundControl 
             key={sound.id} 

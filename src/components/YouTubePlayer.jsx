@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const DEFAULT_PLAYLIST = "PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L"; // User requested playlist
 
-const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = false }) => {
+const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = false, playPauseTrigger = 0 }) => {
   const [player, setPlayer] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(initialVolume);
@@ -22,6 +22,13 @@ const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = fals
   useEffect(() => {
     volumeRef.current = volume;
   }, [volume]);
+
+  // Handle Global Play/Pause Hotkey
+  useEffect(() => {
+    if (playPauseTrigger > 0) { // Should not run on initial mount if trigger is 0
+      togglePlay();
+    }
+  }, [playPauseTrigger]);
 
   const opts = React.useMemo(() => {
     const options = {
@@ -149,29 +156,88 @@ const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = fals
 
   return (
     <div className={cn(
-      "transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] overflow-hidden rounded-2xl backdrop-blur-md border border-white/10 shadow-xl",
+      "transition-all duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1.0)] overflow-hidden rounded-2xl backdrop-blur-md border border-white/10 shadow-xl relative group shrink-0 w-full",
       currentTheme.colors.panel,
-      isMinimized ? "w-64 h-16" : "w-full max-w-md h-64 relative group"
+      isMinimized ? "h-20" : "h-[250px] xl:h-[280px]"
     )}>
-      {/* Header / Controls when minimized */}
+      {/* Header / Controls when minimized (NOW PLAYING info) */}
       <div className={cn(
         "absolute top-0 left-0 right-0 z-30 p-3 flex items-center justify-between transition-opacity pointer-events-none",
-        !isMinimized && "opacity-0 group-hover:opacity-100 bg-gradient-to-b from-black/60 to-transparent"
+        !isMinimized && "opacity-0 group-hover:opacity-100 bg-gradient-to-b from-black/60 to-transparent",
+        isMinimized && "static h-full w-full pointer-events-auto px-5"
       )}>
-        <span className={cn("text-white text-xs font-medium tracking-wider uppercase transition-opacity", isMinimized ? "opacity-0" : "opacity-100")}>
-          Lofi Focus
-        </span>
-        <button 
-          onClick={() => setIsMinimized(!isMinimized)}
-          className="text-white/80 hover:text-white transition-colors z-30 pointer-events-auto"
-        >
-          {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
-        </button>
+        <div className={cn(
+          "flex items-center transition-opacity", 
+          isMinimized ? "opacity-100 flex-1" : "opacity-0 invisible"
+        )}>
+          {/* Playback controls show up on the left when minimized */}
+          {isMinimized && (
+            <div className="flex items-center gap-2 sm:gap-4">
+              <button 
+                onClick={handlePrevious}
+                disabled={mediaSource.type === 'video'}
+                className={cn(
+                  "w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white backdrop-blur-sm transition-colors",
+                  mediaSource.type === 'video' && "opacity-30 cursor-not-allowed hover:bg-white/10"
+                )}
+              >
+                <SkipBack size={14} fill="currentColor" />
+              </button>
+              <button 
+                onClick={togglePlay}
+                className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center text-white backdrop-blur-sm transition-colors"
+              >
+                {isPlaying ? <Pause size={18} fill="currentColor" /> : <Play size={18} fill="currentColor" className="ml-1" />}
+              </button>
+              <button 
+                onClick={handleNext}
+                disabled={mediaSource.type === 'video'}
+                className={cn(
+                  "w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white backdrop-blur-sm transition-colors",
+                  mediaSource.type === 'video' && "opacity-30 cursor-not-allowed hover:bg-white/10"
+                )}
+              >
+                <SkipForward size={14} fill="currentColor" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        {/* Volume control shows up inline in the middle when minimized */}
+        {isMinimized && (
+          <div className="flex shrink-0 justify-center items-center px-4 sm:px-8">
+            <div className="flex items-center gap-2 w-[100px] sm:w-[150px]">
+              <button onClick={toggleMute} className="text-white/80 hover:text-white shrink-0">
+                {isMuted || volume === 0 || isGlobalMute ? <VolumeX size={16} /> : <Volume2 size={16} />}
+              </button>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={isMuted || isGlobalMute ? 0 : volume}
+                onChange={handleVolumeChange}
+                className="w-full h-1.5 bg-white/20 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-white"
+              />
+            </div>
+          </div>
+        )}
+
+        <div className={cn(
+          "flex justify-end",
+          isMinimized ? "flex-1" : ""
+        )}>
+          <button 
+            onClick={() => setIsMinimized(!isMinimized)}
+            className="text-white/50 hover:text-white transition-colors z-40 pointer-events-auto bg-black/20 p-1.5 rounded-md backdrop-blur-md"
+          >
+            {isMinimized ? <Maximize2 size={16} /> : <Minimize2 size={16} />}
+          </button>
+        </div>
       </div>
 
       {/* Video Container */}
       <div className={cn(
-        "w-full h-full transition-opacity duration-300 relative",
+        "w-full h-full transition-opacity duration-300 absolute inset-0 rounded-2xl overflow-hidden",
         isMinimized ? "opacity-0 pointer-events-none" : "opacity-100"
       )}>
         {error ? (
@@ -183,7 +249,7 @@ const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = fals
         ) : null}
         
         <YouTube 
-          key={mediaSource.id} // Force remount on source change to prevent "Invalid video id" errors
+          key={mediaSource.id} 
           videoId={mediaSource.type === 'video' ? mediaSource.id : undefined}
           opts={opts} 
           onReady={onReady}
@@ -194,11 +260,9 @@ const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = fals
         />
       </div>
 
-      {/* Custom Controls Overlay */}
-      <div className={cn(
-        "absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-all duration-300 flex flex-col gap-3 z-20",
-        isMinimized ? "top-0 h-full bg-none justify-center pl-6 pr-2 py-0 !bg-transparent flex-row" : "opacity-0 group-hover:opacity-100"
-      )}>
+      {/* Custom Controls Overlay (Only when expanded) */}
+      {!isMinimized && (
+        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 via-black/60 to-transparent transition-all duration-300 flex flex-col gap-3 z-20 opacity-0 group-hover:opacity-100">
         
         {/* URL Input (Hidden when minimized) */}
         {!isMinimized && (
@@ -272,6 +336,7 @@ const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = fals
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };
