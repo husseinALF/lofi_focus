@@ -27,7 +27,7 @@ const Layout = ({ children }) => {
                 playerVars: { autoplay: 1, controls: 0, disablekb: 1, fs: 0, loop: 1, modestbranding: 1, mute: 1, rel: 0, showinfo: 0, iv_load_policy: 3, playlist: currentTheme.video.replace('youtube:', '') }
               }}
               className="w-full h-full"
-              iframeClassName="w-full h-full object-cover"
+              iframeClassName="w-full h-full object-cover object-[center_center]"
               onReady={(e) => { e.target.playVideo(); e.target.mute(); }}
             />
           </motion.div>
@@ -42,7 +42,7 @@ const Layout = ({ children }) => {
             muted
             loop
             playsInline
-            className="absolute inset-0 w-full h-full object-cover"
+            className="absolute inset-0 w-full h-full object-cover object-[center_center]"
             src={currentTheme.video}
             poster={currentTheme.bgImage} // Fallback image
           />

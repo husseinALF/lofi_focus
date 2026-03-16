@@ -1,14 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Play, Pause, RotateCcw } from 'lucide-react';
 import { cn } from '../lib/utils';
 
-const WORK_TIME = 25 * 60;
-const BREAK_TIME = 5 * 60;
 
-const PomodoroTimer = ({ onSessionComplete }) => {
-  const [mode, setMode] = useState('work'); // 'work' | 'break'
-  const [timeLeft, setTimeLeft] = useState(WORK_TIME);
+
+const PomodoroTimer = ({ onSessionComplete, workTime = 25, breakTime = 5 }) => {
+  // Initialize from localStorage or defaults
+  const [mode, setMode] = useState(() => {
+    const saved = localStorage.getItem('lofi_pomodoro_state');
+    return saved ? JSON.parse(saved).mode : 'work';
+  });
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const saved = localStorage.getItem('lofi_pomodoro_state');
+    return saved ? JSON.parse(saved).timeLeft : workTime * 60;
+  });
   const [isActive, setIsActive] = useState(false);
+  
+  // Track previous settings to know when they ACTUALLY change
+  const prevSettingsRef = useRef({ workTime, breakTime });
+
+  // Save to localStorage whenever timeLeft or mode changes
+  useEffect(() => {
+    localStorage.setItem('lofi_pomodoro_state', JSON.stringify({ mode, timeLeft }));
+  }, [mode, timeLeft]);
+
+  // When settings change from parent (SettingsModal), update immediately if inactive
+  useEffect(() => {
+    const prev = prevSettingsRef.current;
+    if (prev.workTime !== workTime || prev.breakTime !== breakTime) {
+      if (!isActive) {
+        setTimeLeft(mode === 'work' ? workTime * 60 : breakTime * 60);
+      }
+      prevSettingsRef.current = { workTime, breakTime };
+    }
+  }, [workTime, breakTime, mode, isActive]);
 
   useEffect(() => {
     let interval = null;
@@ -25,14 +50,14 @@ const PomodoroTimer = ({ onSessionComplete }) => {
 
       // If we just finished a 'work' session naturally
       if (mode === 'work' && onSessionComplete) {
-        onSessionComplete(25); // Ändrad tillbaka till 25 minuter
+        onSessionComplete(workTime); // Pass actual workTime minutes
       }
       
       // Vänta 5 sekunder innan vi byter läge och startar timern igen
       setTimeout(() => {
         const nextMode = mode === 'work' ? 'break' : 'work';
         setMode(nextMode);
-        setTimeLeft(nextMode === 'work' ? WORK_TIME : BREAK_TIME);
+        setTimeLeft(nextMode === 'work' ? workTime * 60 : breakTime * 60);
         setIsActive(true); // STARTA NÄSTA RUNDA AUTOMATISKT
       }, 5000);
     }
@@ -43,13 +68,13 @@ const PomodoroTimer = ({ onSessionComplete }) => {
 
   const resetTimer = () => {
     setIsActive(false);
-    setTimeLeft(mode === 'work' ? WORK_TIME : BREAK_TIME);
+    setTimeLeft(mode === 'work' ? workTime * 60 : breakTime * 60);
   };
 
   const switchMode = (newMode) => {
     setMode(newMode);
     setIsActive(false);
-    setTimeLeft(newMode === 'work' ? WORK_TIME : BREAK_TIME);
+    setTimeLeft(newMode === 'work' ? workTime * 60 : breakTime * 60);
   };
 
   const formatTime = (seconds) => {
@@ -59,8 +84,8 @@ const PomodoroTimer = ({ onSessionComplete }) => {
   };
 
   return (
-    <div className="hidden md:flex items-center gap-3 bg-black/20 backdrop-blur-md rounded-full pl-1 pr-3 py-1 border border-white/10 shadow-lg">
-      <div className="flex bg-white/5 rounded-full p-1">
+    <div className="flex items-center gap-2 sm:gap-3 bg-black/20 backdrop-blur-md rounded-full p-1 sm:pl-1 sm:pr-3 sm:py-1 border border-white/10 shadow-lg w-full max-w-[280px] sm:max-w-max mx-auto justify-between sm:justify-start">
+      <div className="flex bg-white/5 rounded-full p-1 shrink-0">
         <button
           onClick={() => switchMode('work')}
           className={cn(

@@ -6,7 +6,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 const DEFAULT_PLAYLIST = "PL6NdkXsPL07Il2hEQGcLI4dg_LTg7xA2L"; // User requested playlist
 
-const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = false, playPauseTrigger = 0 }) => {
+const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = false, playPauseTrigger = 0, minimizeTrigger = 0 }) => {
   const [player, setPlayer] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(initialVolume);
@@ -29,6 +29,13 @@ const YouTubePlayer = ({ initialVolume = 50, onVolumeChange, isGlobalMute = fals
       togglePlay();
     }
   }, [playPauseTrigger]);
+
+  // Handle Global Minimize Hotkey (F)
+  useEffect(() => {
+    if (minimizeTrigger > 0) {
+      setIsMinimized(prev => !prev);
+    }
+  }, [minimizeTrigger]);
 
   const opts = React.useMemo(() => {
     const options = {

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useTheme } from '../contexts/ThemeContext';
-import { Plus, Check, Trash2, CheckCircle2, Circle } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Check, Trash2, CheckCircle2, Circle, GripVertical } from 'lucide-react';
+import { motion, AnimatePresence, Reorder } from 'framer-motion';
 import { cn } from '../lib/utils';
 
 export const FocusTasks = () => {
@@ -56,25 +56,27 @@ export const FocusTasks = () => {
               What's your main focus right now? Add a task below.
             </motion.div>
           ) : (
-            tasks.map(task => (
-              <motion.div 
+            <Reorder.Group axis="y" values={tasks} onReorder={setTasks} className="space-y-2">
+              {tasks.map(task => (
+                <Reorder.Item 
                 key={task.id}
-                layout
-                initial={{ opacity: 0, y: 15, height: 0, marginBottom: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto", marginBottom: 8 }}
-                exit={{ opacity: 0, scale: 0.95, height: 0, marginBottom: 0, transition: { duration: 0.2 } }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+                value={task}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
                 className={cn(
-                  "group flex items-center justify-between p-2.5 rounded-xl border transition-colors overflow-hidden",
+                  "group flex items-center justify-between p-2.5 rounded-xl border transition-colors overflow-hidden cursor-grab active:cursor-grabbing",
                   task.completed 
                     ? "bg-white/5 border-white/5 opacity-60" 
                     : "bg-white/10 border-white/10 hover:bg-white/15 hover:border-white/20"
                 )}
               >
-              <button 
-                onClick={() => toggleTask(task.id)}
-                className="flex items-center gap-3 flex-1 text-left"
-              >
+              <div className="flex items-center gap-3 flex-1 text-left">
+                <GripVertical size={14} className="text-white/20 group-hover:text-white/50 flex-shrink-0" />
+                <button 
+                  onClick={() => toggleTask(task.id)}
+                  className="flex items-center gap-3 flex-1 text-left"
+                >
                 {task.completed ? (
                   <CheckCircle2 size={18} className="text-green-400 flex-shrink-0" />
                 ) : (
@@ -87,6 +89,7 @@ export const FocusTasks = () => {
                   {task.text}
                 </span>
               </button>
+              </div>
               
               <button 
                 onClick={() => deleteTask(task.id)}
@@ -95,8 +98,9 @@ export const FocusTasks = () => {
               >
                 <Trash2 size={14} />
               </button>
-            </motion.div>
-          ))
+            </Reorder.Item>
+          ))}
+          </Reorder.Group>
         )}
         </AnimatePresence>
       </div>

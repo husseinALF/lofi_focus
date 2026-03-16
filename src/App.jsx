@@ -6,75 +6,126 @@ import SoundMixer from './components/SoundMixer';
 import PomodoroTimer from './components/PomodoroTimer';
 import { FocusTasks } from './components/FocusTasks';
 import { SessionStats } from './components/SessionStats';
-import { Save, Disc, Trash2, Moon, Sun, Coffee, Trees, Volume2, VolumeX, Keyboard, X, MonitorPlay } from 'lucide-react';
+import { Save, Disc, Trash2, Moon, Sun, Coffee, Trees, Volume2, VolumeX, Keyboard, X, MonitorPlay, Settings } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from './lib/utils';
 
-const HelpModal = ({ isOpen, onClose }) => {
+const SettingsModal = ({ isOpen, onClose, pomodoroSettings, setPomodoroSettings }) => {
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div 
+          onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm overflow-y-auto"
         >
           <motion.div 
             initial={{ scale: 0.95, opacity: 0, y: 10 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.95, opacity: 0, y: 10 }}
             transition={{ type: "spring", duration: 0.4 }}
-            className="relative w-full max-w-md bg-zinc-900/90 border border-white/10 rounded-2xl p-6 shadow-2xl"
+            className="relative w-full max-w-md bg-zinc-900/90 border border-white/10 rounded-2xl p-6 shadow-2xl my-8"
           >
-        <button 
-          onClick={onClose}
-          className="absolute right-4 top-4 text-white/50 hover:text-white transition-colors"
-        >
-          <X size={20} />
-        </button>
-        
-        <div className="flex items-center gap-3 mb-6">
-          <div className="p-2 bg-white/10 rounded-lg">
-            <Keyboard className="text-white" size={24} />
-          </div>
-          <h2 className="text-xl font-bold text-white">Keyboard Shortcuts</h2>
-        </div>
-
-        <div className="space-y-4">
-          <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
-            <span className="text-white/80 font-medium">Play / Pause Music</span>
-            <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">Space</kbd>
-          </div>
-          
-          <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
-            <span className="text-white/80 font-medium">Mute / Unmute All</span>
-            <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">M</kbd>
-          </div>
-
-          <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
-            <span className="text-white/80 font-medium">Switch Themes</span>
-            <div className="flex gap-1">
-              <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">1</kbd>
-              <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">2</kbd>
-              <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">3</kbd>
+            <button 
+              onClick={onClose}
+              className="absolute right-4 top-4 text-white/50 hover:text-white transition-colors"
+            >
+              <X size={20} />
+            </button>
+            
+            <div className="flex items-center gap-3 mb-6">
+              <div className="p-2 bg-white/10 rounded-lg">
+                <Settings className="text-white" size={24} />
+              </div>
+              <h2 className="text-xl font-bold text-white">Settings & Info</h2>
             </div>
-          </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
-            <span className="text-white/80 font-medium">Custom Background</span>
-            <span className="text-white/40 text-xs font-medium px-2 py-1 flex items-center gap-1">
-              <MonitorPlay size={12} className="inline mr-1" /> Look for TV Icon
-            </span>
-          </div>
-        </div>
-        
-        <div className="mt-6 text-center text-xs text-white/40">
-          Shortcuts are disabled when typing in text fields.
-        </div>
-      </motion.div>
-    </motion.div>
-    )}
+            <div className="space-y-6">
+              {/* Pomodoro Settings */}
+              <div className="space-y-4">
+                <h3 className="text-white/90 font-semibold text-sm uppercase tracking-wider">Pomodoro Timer</h3>
+                
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <label className="text-white/70 text-sm">Focus Time</label>
+                    <span className="text-white font-mono text-sm">{pomodoroSettings.workTime} min</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="1" max="60" 
+                    value={pomodoroSettings.workTime}
+                    onChange={(e) => setPomodoroSettings(prev => ({ ...prev, workTime: Number(e.target.value) }))}
+                    className="w-full accent-white/80 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <label className="text-white/70 text-sm">Break Time</label>
+                    <span className="text-white font-mono text-sm">{pomodoroSettings.breakTime} min</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="1" max="30" 
+                    value={pomodoroSettings.breakTime}
+                    onChange={(e) => setPomodoroSettings(prev => ({ ...prev, breakTime: Number(e.target.value) }))}
+                    className="w-full accent-white/80 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="h-px w-full bg-white/10" />
+
+              {/* Keyboard Shortcuts */}
+              <div className="space-y-3">
+                <h3 className="text-white/90 font-semibold text-sm uppercase tracking-wider">Keyboard Shortcuts</h3>
+                
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                  <span className="text-white/80 font-medium">Zen Mode (Hide UI)</span>
+                  <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">Z</kbd>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                  <span className="text-white/80 font-medium">Play / Pause Music</span>
+                  <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">Space</kbd>
+                </div>
+                
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                  <span className="text-white/80 font-medium">Mute / Unmute All</span>
+                  <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">M</kbd>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                  <span className="text-white/80 font-medium">Toggle Player Size</span>
+                  <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">F</kbd>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                  <span className="text-white/80 font-medium">Switch Themes</span>
+                  <div className="flex gap-1">
+                    <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">1</kbd>
+                    <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">2</kbd>
+                    <kbd className="px-2 py-1 bg-white/10 rounded-md text-white text-xs font-mono border border-white/10 shadow-sm">3</kbd>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/5">
+                  <span className="text-white/80 font-medium">Custom Background</span>
+                  <span className="text-white/40 text-xs font-medium px-2 py-1 flex items-center gap-1">
+                    <MonitorPlay size={12} className="inline mr-1" /> Look for TV Icon
+                  </span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-6 text-center text-xs text-white/40">
+              Shortcuts are disabled when typing in text fields.
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
     </AnimatePresence>
   );
 };
@@ -174,10 +225,20 @@ const LofiStation = () => {
   const [isGlobalMute, setIsGlobalMute] = useState(false);
   const [sessionStats, setSessionStats] = useState({ focusMinutes: 0, completedSessions: 0, date: new Date().toLocaleDateString() });
   
-  // Hotkey States
+  // States
   const [toast, setToast] = useState({ message: '', visible: false });
   const [playPauseTrigger, setPlayPauseTrigger] = useState(0);
-  const [isHelpOpen, setIsHelpOpen] = useState(false);
+  const [minimizeTrigger, setMinimizeTrigger] = useState(0);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isZenMode, setIsZenMode] = useState(false);
+  const [pomodoroSettings, setPomodoroSettings] = useState(() => {
+    const saved = localStorage.getItem('lofi_pomodoro_settings');
+    return saved ? JSON.parse(saved) : { workTime: 25, breakTime: 5 };
+  });
+
+  useEffect(() => {
+    localStorage.setItem('lofi_pomodoro_settings', JSON.stringify(pomodoroSettings));
+  }, [pomodoroSettings]);
 
   // Load saved mixes and stats from local storage on mount
   useEffect(() => {
@@ -214,14 +275,23 @@ const LofiStation = () => {
 
       const key = e.key.toLowerCase();
       
+      // Zen Mode (Z)
+      if (key === 'z') {
+        setIsZenMode(prev => {
+          const newState = !prev;
+          showToast(newState ? "🧘 Zen Mode On" : "🖥️ Zen Mode Off");
+          return newState;
+        });
+      }
+
       // Help Toggle (?) or (H)
       if (key === '?' || (key === 'h' && !e.metaKey && !e.ctrlKey)) {
-        setIsHelpOpen(prev => !prev);
+        setIsSettingsOpen(prev => !prev);
       }
 
       // If modal is open, ignore other hotkeys except closing it
-      if (isHelpOpen) {
-        if (key === 'escape') setIsHelpOpen(false);
+      if (isSettingsOpen) {
+        if (key === 'escape') setIsSettingsOpen(false);
         return;
       }
 
@@ -241,6 +311,13 @@ const LofiStation = () => {
         showToast("⏯️ Play/Pause Music");
       }
 
+      // Minimize/Maximize Player (F)
+      if (key.toLowerCase() === 'f') {
+        e.preventDefault();
+        setMinimizeTrigger(prev => prev + 1);
+        showToast("🪟 Toggle Player Size");
+      }
+
       // Theme Switching (1-3)
       if (['1', '2', '3'].includes(key)) {
         const themeMap = { '1': 'forest', '2': 'cafe', '3': 'bedroom' };
@@ -256,7 +333,7 @@ const LofiStation = () => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [setTheme, isHelpOpen]); // Add isHelpOpen to dep array
+  }, [setTheme, isSettingsOpen]); // Add isSettingsOpen to dep array
 
   const handleSessionComplete = (minutes) => {
     setSessionStats(prev => {
@@ -313,30 +390,57 @@ const LofiStation = () => {
   return (
     <Layout>
       <Toast message={toast.message} isVisible={toast.visible} />
-      <HelpModal isOpen={isHelpOpen} onClose={() => setIsHelpOpen(false)} />
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
+        pomodoroSettings={pomodoroSettings}
+        setPomodoroSettings={setPomodoroSettings}
+      />
       
-      <header className="p-6 flex justify-between items-center z-20">
-        <div className="flex items-center gap-3">
+      <header className="p-4 sm:p-6 flex flex-col sm:flex-row justify-between items-center z-20 gap-4 sm:gap-0">
+        <div className={cn("flex items-center gap-3 transition-opacity duration-500 w-full sm:w-auto justify-between sm:justify-start", isZenMode && "opacity-0 pointer-events-none")}>
           <div className="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20">
             <Disc className="text-white animate-spin-slow" size={24} />
           </div>
-          <h1 className="text-2xl font-bold text-white tracking-tight drop-shadow-md hidden sm:block">
+          <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-md">
             Lofi Focus
           </h1>
+          {/* Mobile settings button placed in header left area for balance if needed, but handled globally */}
+          <div className="sm:hidden flex items-center gap-2">
+             <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-full bg-black/20 text-white/70 hover:bg-black/30 hover:text-white backdrop-blur-sm border border-white/10 transition-colors"
+             >
+                <Settings size={18} />
+             </button>
+             <button 
+              onClick={() => setIsGlobalMute(!isGlobalMute)}
+              className={cn(
+                "w-9 h-9 flex items-center justify-center rounded-full backdrop-blur-sm border border-white/10 transition-colors",
+                isGlobalMute ? "bg-red-500/20 text-red-200 border-red-500/30" : "bg-black/20 text-white/70 hover:bg-black/30 hover:text-white"
+              )}
+             >
+                {isGlobalMute ? <VolumeX size={16} /> : <Volume2 size={16} />}
+             </button>
+          </div>
         </div>
 
-        {/* Centered Pomodoro Timer */}
-        <div className="absolute left-1/2 top-6 -translate-x-1/2 z-30">
-          <PomodoroTimer onSessionComplete={handleSessionComplete} />
+        {/* Pomodoro Timer - Static on mobile, Absolute centered on tablet/desktop */}
+        <div className="sm:absolute sm:left-1/2 sm:top-6 sm:-translate-x-1/2 z-30 transition-transform duration-500 w-full sm:w-auto flex justify-center order-first sm:order-none">
+          <PomodoroTimer 
+            onSessionComplete={handleSessionComplete} 
+            workTime={pomodoroSettings.workTime}
+            breakTime={pomodoroSettings.breakTime}
+          />
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className={cn("hidden sm:flex items-center gap-4 transition-opacity duration-500", isZenMode && "opacity-0 pointer-events-none")}>
           <button 
-            onClick={() => setIsHelpOpen(true)}
+            onClick={() => setIsSettingsOpen(true)}
             className="w-9 h-9 flex items-center justify-center rounded-full bg-black/20 text-white/70 hover:bg-black/30 hover:text-white backdrop-blur-sm border border-white/10 transition-colors"
-            title="Shortcuts (H or ?)"
+            title="Settings (H or ?)"
           >
-            <Keyboard size={18} />
+            <Settings size={18} />
           </button>
           
           <button 
@@ -348,26 +452,37 @@ const LofiStation = () => {
             title="Hotkey: M"
           >
             {isGlobalMute ? <VolumeX size={16} /> : <Volume2 size={16} />}
-            <span className="text-xs font-medium uppercase tracking-wider hidden sm:inline">
+            <span className="text-xs font-medium uppercase tracking-wider hidden md:inline">
               {isGlobalMute ? "Unmute All" : "Mute All"}
             </span>
           </button>
-          <ThemeSwitcher />
+          <div className="hidden md:block">
+            <ThemeSwitcher />
+          </div>
+        </div>
+        
+        {/* Mobile Theme Switcher */}
+        <div className={cn("sm:hidden w-full flex justify-center mt-2 transition-opacity duration-500", isZenMode && "opacity-0 pointer-events-none")}>
+           <ThemeSwitcher />
         </div>
       </header>
 
-      <main className="flex-1 flex flex-col lg:flex-row items-start justify-center gap-8 p-4 lg:p-8 max-w-[1400px] mx-auto w-full">
+      <main className={cn(
+        "flex-1 flex flex-col lg:flex-row items-start justify-center gap-8 p-4 lg:p-8 max-w-[1400px] mx-auto w-full transition-all duration-700",
+        isZenMode && "opacity-0 pointer-events-none translate-y-8 scale-95"
+      )}>
         
         {/* Left Column: Player & Mixes */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.1 }}
-          className="flex flex-col gap-6 w-full lg:w-[400px] xl:w-[450px] flex-shrink-0"
+          className="flex flex-col gap-6 w-full max-w-md mx-auto lg:max-w-none lg:mx-0 lg:w-[400px] xl:w-[450px] flex-shrink-0"
         >
           <YouTubePlayer 
             isGlobalMute={isGlobalMute} 
             playPauseTrigger={playPauseTrigger}
+            minimizeTrigger={minimizeTrigger}
           />
           
           {/* Saved Mixes Panel */}
@@ -445,7 +560,7 @@ const LofiStation = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-          className="flex flex-col gap-6 w-full lg:w-[320px] xl:w-[350px] flex-shrink-0"
+          className="flex flex-col gap-6 w-full max-w-md mx-auto lg:max-w-none lg:mx-0 lg:w-[320px] xl:w-[350px] flex-shrink-0"
         >
           <SessionStats stats={sessionStats} />
           <FocusTasks />
@@ -456,7 +571,7 @@ const LofiStation = () => {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, ease: "easeOut", delay: 0.3 }}
-          className="flex flex-col w-full lg:w-[320px] xl:w-[350px] flex-shrink-0"
+          className="flex flex-col w-full max-w-md mx-auto lg:max-w-none lg:mx-0 lg:w-[320px] xl:w-[350px] flex-shrink-0"
         >
           <SoundMixer 
             onMixChange={handleMixChange} 
